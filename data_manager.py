@@ -54,7 +54,7 @@ def merge_data(rating_clean, anime_clean):
 # # hàm xây dựng TF-IDF và ma trận cosine similarity  
 @st.cache_resource
 def build_tfidf(anime_cb):
+    anime_cb = anime_cb.copy()
     tfidf = TfidfVectorizer(stop_words="english")
     tfidf_matrix = tfidf.fit_transform(anime_cb["combined"])
-    cosine_sim = cosine_similarity(tfidf_matrix)
-    return tfidf, tfidf_matrix, cosine_sim
+    return tfidf, tfidf_matrix

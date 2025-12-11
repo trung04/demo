@@ -67,7 +67,7 @@ st.subheader("🔍 Vector hóa dữ liệu IF-IDF")
 
 
 # # TF-IDF vectorizer
-tfidf, tfidf_matrix, cosine_sim = build_tfidf(anime_clean)
+tfidf, tfidf_matrix = build_tfidf(anime_clean)
 sample_tfidf = pd.DataFrame(
     tfidf_matrix[:10, :20].toarray(),
     columns=tfidf.get_feature_names_out()[:20],
