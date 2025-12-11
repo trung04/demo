@@ -118,7 +118,7 @@ with tab2:
     top_n = st.slider("Chọn số lượng top:", 5, 30, 15)
 
     top_anime = (
-        rating_clean_anime.sort_values("rating", ascending=False)
+        anime_clean.sort_values("rating", ascending=False)
         .head(top_n)
         .reset_index(drop=True)
     )
@@ -185,7 +185,7 @@ with tab5:
 
     st.info("Chọn một anime để xem các gợi ý tương tự")
 
-    anime_list = rating_clean_anime["name"].values
+    anime_list = anime_clean["name"].values
     selected = st.selectbox("🎬 Chọn một anime:", anime_list)
 
     st.write(f"👉 Gợi ý cho **{selected}** sẽ hiển thị tại đây.")
