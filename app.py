@@ -6,18 +6,14 @@ import seaborn as sns
 from wordcloud import WordCloud
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+from data_manager import load_data, build_tfidf,merge_data, preprocess_duplicate,preprocess_missing_values,delete_invalid_ratings
+
 st.set_page_config(page_title="Anime Analytics Dashboard", layout="wide")
 
 
 # ============================
 # 1. LOAD DATA
 # ============================
-@st.cache_data
-def load_data():
-    rating = pd.read_csv("rating.csv")
-    anime = pd.read_csv("anime.csv")
-    return rating, anime
-
 rating, anime = load_data()
 
 # ============================
@@ -46,62 +42,45 @@ with colB:
     st.dataframe(missing_rating, use_container_width=True)
 
 # Xử lý dữ liệu
-anime = anime[~np.isnan(anime["rating"])]
-anime["genre"] = anime["genre"].fillna(anime["genre"].mode()[0])
-anime["type"] = anime["type"].fillna(anime["type"].mode()[0])
-
+anime = preprocess_missing_values(anime)
 after_missing = pd.DataFrame({"Tên cột": anime.columns, "Số lượng thiếu": anime.isna().sum().values})
 
 st.subheader("⚙️ Sau khi xử lý Missing values")
 st.dataframe(after_missing, use_container_width=True)
 
-# Loại bỏ rating -1
-rating_clean = rating[rating["rating"] != -1]
+# Invalid Ratings
+rating = delete_invalid_ratings(rating)
 
 # Duplicate
 st.subheader("🧹 Loại bỏ dữ liệu trùng lặp")
-before_dup = len(rating_clean)
-rating_clean = rating_clean.drop_duplicates()
-after_dup = len(rating_clean)
-
+before_dup = len(rating)
 before_dup_anime = len(anime)
-rating_clean_anime = anime.drop_duplicates()
-after_dup_anime = len(rating_clean_anime)
+anime_clean,rating_clean = preprocess_duplicate(anime,rating)
+after_dup = len(rating_clean)
+after_dup_anime = len(anime_clean)
 
 st.success(f"✔ Đã loại {before_dup - after_dup} dòng trùng trong rating.")
 st.success(f"✔ Đã loại {before_dup_anime - after_dup_anime} dòng trùng trong anime.")
 
 st.subheader("🔍 Vector hóa dữ liệu IF-IDF")
 # Tạo văn bản kết hợp (genre + type)
-anime_cb = rating_clean_anime.copy()
-anime_cb["combined"] = (
-    anime_cb["genre"].fillna("").replace(",", " ") + " " +
-    anime_cb["type"].fillna("")
-)
+
+
 # TF-IDF vectorizer
-tfidf = TfidfVectorizer(stop_words="english")
-tfidf_matrix = tfidf.fit_transform(anime_cb["combined"])
-tfidf_df = pd.DataFrame(
-    tfidf_matrix.todense(),
-    columns=tfidf.get_feature_names_out(),
-    index=anime_cb["name"]
+tfidf, tfidf_matrix, cosine_sim = build_tfidf(anime_clean)
+sample_tfidf = pd.DataFrame(
+    tfidf_matrix[:10, :20].toarray(),
+    columns=tfidf.get_feature_names_out()[:20],
+    index=anime_clean["name"][:10]
 )
-st.dataframe(tfidf_df)
+st.dataframe(sample_tfidf)
 
 
 # ============================
 # 3. GỘP DỮ LIỆU
 # ============================
 st.header("📌 Dữ liệu sau khi gộp")
-
-merged = rating_clean.merge(rating_clean_anime, on="anime_id", how="inner")
-merged = merged.rename(columns={
-    "rating_x": "user_rating",
-    "rating_y": "anime_avg_rating",
-    "name": "anime_name",
-    "genre": "anime_genre"
-})
-
+merged = merge_data(rating_clean, anime_clean)
 st.dataframe(merged.head(), use_container_width=True)
 
 # ============================
