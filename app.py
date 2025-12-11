@@ -7,6 +7,7 @@ from wordcloud import WordCloud
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from data_manager import load_data, preprocess_missing_values, delete_invalid_ratings, preprocess_duplicate, merge_data, build_tfidf
+import altair as alt
 
 st.set_page_config(page_title="Anime Analytics Dashboard", layout="wide")
 
@@ -101,13 +102,21 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs([
 # ============================
 with tab1:
     st.subheader("📈 Histogram phân bố Rating")
+    chart = (
+        alt.Chart(anime_clean)
+        .mark_bar(opacity=0.9)
+        .encode(
+            x=alt.X("rating:Q", bin=alt.Bin(maxbins=20), title="Rating"),
+            y=alt.Y("count()", title="Tần suất"),
+            tooltip=[
+                alt.Tooltip("count()", title="Số lượng"),
+                alt.Tooltip("rating:Q", title="Khoảng rating", bin=True)
+            ],
+        )
+        .properties(width="container", height=350, title="Phân bố Rating (Altair)")
+    )
 
-    fig, ax = plt.subplots(figsize=(8, 5))
-    sns.histplot(data=rating_clean, x="rating", bins=20, kde=True, color="skyblue", ax=ax)
-    ax.set_title("Phân bố Rating", fontsize=14, fontweight="bold")
-    ax.set_xlabel("Rating")
-    ax.set_ylabel("Tần suất")
-    st.pyplot(fig)
+    st.altair_chart(chart, use_container_width=True)
 
 # ============================
 # TAB 2: TOP ANIME
@@ -122,26 +131,45 @@ with tab2:
         .head(top_n)
         .reset_index(drop=True)
     )
+    order = top_anime["name"].tolist()
+
+
 
     st.dataframe(top_anime, width="stretch")
 
-    fig, ax = plt.subplots(figsize=(12, 6))
-    bars = ax.bar(top_anime["name"], top_anime["rating"], color=sns.color_palette("tab20", top_n))
+    # Mỗi bar một màu
+    top_anime["color_id"] = top_anime.index.astype(str)
+    order = top_anime["name"].tolist()
+    # Biểu đồ chính
+    bars = (
+    alt.Chart(top_anime)
+    .mark_bar(cornerRadiusTopLeft=6, cornerRadiusTopRight=6)
+    .encode(
+        x=alt.X("name:N", sort=order),
+        y=alt.Y("rating:Q"),
+        color=alt.Color("color_id:N", legend=None)
+    )
+)
 
-    for bar, rating in zip(bars, top_anime["rating"]):
-        ax.text(
-            bar.get_x() + bar.get_width() / 2,
-            bar.get_height() - 0.4,
-            f"{rating:.2f}",
-            ha="center",
-            color="black",
-            bbox=dict(facecolor="orange", edgecolor="black", boxstyle="round,pad=0.3")
+    text = (
+        alt.Chart(top_anime)
+        .mark_text(align="center", baseline="bottom", dy=-4)
+        .encode(
+            x=alt.X("name:N", sort=order),
+            y="rating:Q",
+            text="rating:Q"
         )
+    )
 
-    plt.xticks(rotation=90)
-    ax.set_ylabel("Rating")
-    ax.set_title("Top Anime theo Rating", fontsize=14, fontweight="bold")
-    st.pyplot(fig)
+    # Layer + config
+    final_chart = (
+        (bars + text)
+        .properties(width="container", height=450)
+        .configure_view(strokeWidth=0)
+        .configure_axis(grid=False)
+    )
+
+    st.altair_chart(final_chart, use_container_width=True)
 
 # # ============================
 # # TAB 3: PHÂN TÍCH GENRE
@@ -149,21 +177,44 @@ with tab2:
 with tab3:
     st.subheader("🎭 Tần suất thể loại Anime")
 
+    # Tách từng genre
     genre_exploded = anime["genre"].dropna().str.split(", ").explode()
-    genre_count = genre_exploded.value_counts()
+    # Đếm tần suất
+    genre_count = genre_exploded.value_counts().reset_index()
+    genre_count.columns = ["genre", "count"]
+    # Chuyển thành format hàng ngang
+    genre_row = genre_count.set_index("genre").T
 
-    genre_df = pd.DataFrame([genre_count.values], columns=genre_count.index)
-    st.dataframe(genre_df, width="stretch")
+    st.dataframe(genre_row, width="stretch")
+    
+    
 
-    st.subheader("☁️ WordCloud Genre")
+   
+    st.subheader("📊 Phân bố thể loại Anime (Altair Bar Chart)")
 
-    wc_text = " ".join(genre_exploded)
-    wordcloud = WordCloud(width=900, height=400, background_color="white").generate(wc_text)
+    chart_bar = (
+        alt.Chart(genre_count)
+        .mark_bar(cornerRadiusTopLeft=6, cornerRadiusTopRight=6)
+        .encode(
+            x=alt.X("genre:N", sort="-y", title="Thể loại"),
+            y=alt.Y("count:Q", title="Tần suất"),
+            color=alt.Color("genre:N", legend=None)
+        )
+        .properties(width="container", height=400)
+    )
 
-    fig, ax = plt.subplots(figsize=(12, 6))
+    st.altair_chart(chart_bar, use_container_width=True)
+    st.subheader("☁️ WordCloud thể loại Anime")
+    # Tạo WordCloud
+    genre_text = " ".join(genre_exploded.tolist())
+    wordcloud = WordCloud(width=800, height=400, background_color="white").generate(genre_text)
+    # Hiển thị WordCloud
+    fig, ax = plt.subplots(figsize=(10, 5))
     ax.imshow(wordcloud, interpolation="bilinear")
     ax.axis("off")
     st.pyplot(fig)
+    
+
 
 # # ============================
 # # TAB 4: HEATMAP
@@ -173,19 +224,34 @@ with tab4:
 
     corr = merged[["user_rating", "anime_avg_rating", "members"]].corr()
 
-    fig, ax = plt.subplots(figsize=(6, 4))
-    sns.heatmap(corr, annot=True, cmap="coolwarm", ax=ax)
+    plt.style.use("seaborn-v0_8")
+
+    fig, ax = plt.subplots(figsize=(7, 5))
+
+    sns.heatmap(
+        corr,
+        annot=True,
+        cmap="coolwarm",
+        linewidths=2,        # đường kẻ rõ hơn
+        linecolor="white",
+        annot_kws={"size": 13, "weight": "bold"},
+        cbar_kws={"shrink": 0.7, "aspect": 20},
+        square=True
+    )
+
+    ax.set_title("Correlation Heatmap", fontsize=16, fontweight="bold", pad=15)
+
     st.pyplot(fig)
 
 # # ============================
 # # TAB 5: RECOMMENDATION SYSTEM
 # # ============================
-with tab5:
-    st.subheader("🤖 Hệ thống gợi ý Anime")
+# with tab5:
+#     st.subheader("🤖 Hệ thống gợi ý Anime")
 
-    st.info("Chọn một anime để xem các gợi ý tương tự")
+#     st.info("Chọn một anime để xem các gợi ý tương tự")
 
-    anime_list = anime_clean["name"].values
-    selected = st.selectbox("🎬 Chọn một anime:", anime_list)
+#     anime_list = anime_clean["name"].values
+#     selected = st.selectbox("🎬 Chọn một anime:", anime_list)
 
-    st.write(f"👉 Gợi ý cho **{selected}** sẽ hiển thị tại đây.")
+#     st.write(f"👉 Gợi ý cho **{selected}** sẽ hiển thị tại đây.")
