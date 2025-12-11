@@ -14,7 +14,7 @@ st.set_page_config(page_title="Anime Analytics Dashboard", layout="wide")
 # ============================
 # 1. LOAD DATA
 # ============================
-# rating, anime = load_data()
+rating, anime = load_data()
 
 # ============================
 # 1. HEADER
