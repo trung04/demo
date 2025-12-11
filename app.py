@@ -6,7 +6,7 @@ import seaborn as sns
 from wordcloud import WordCloud
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from data_manager import load_data, build_tfidf,merge_data, preprocess_duplicate,preprocess_missing_values,delete_invalid_ratings
+from data_manager import load_data
 
 st.set_page_config(page_title="Anime Analytics Dashboard", layout="wide")
 
