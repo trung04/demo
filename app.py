@@ -14,7 +14,7 @@ st.set_page_config(page_title="Anime Analytics Dashboard", layout="wide")
 # ============================
 # 1. LOAD DATA
 # ============================
-rating, anime = load_data()
+# rating, anime = load_data()
 
 # ============================
 # 1. HEADER
@@ -27,26 +27,26 @@ st.caption("✨ Phân tích, trực quan hóa và gợi ý anime dựa trên d�
 # ============================
 st.header("🛠️ Làm sạch và chuẩn bị dữ liệu")
 
-colA, colB = st.columns(2)
+# colA, colB = st.columns(2)
 
-with colA:
-    st.subheader("🔍 Thiếu dữ liệu - Anime")
-    missing_anime = anime.isna().sum()
-    missing_anime = pd.DataFrame({"Tên cột": anime.columns, "Số lượng thiếu": missing_anime.values})
-    st.dataframe(missing_anime, use_container_width=True)
+# with colA:
+#     st.subheader("🔍 Thiếu dữ liệu - Anime")
+#     missing_anime = anime.isna().sum()
+#     missing_anime = pd.DataFrame({"Tên cột": anime.columns, "Số lượng thiếu": missing_anime.values})
+#     st.dataframe(missing_anime, use_container_width=True)
 
-with colB:
-    st.subheader("🔍 Thiếu dữ liệu - Rating")
-    missing_rating = rating.isna().sum()
-    missing_rating = pd.DataFrame({"Tên cột": rating.columns, "Số lượng thiếu": missing_rating.values})
-    st.dataframe(missing_rating, use_container_width=True)
+# with colB:
+#     st.subheader("🔍 Thiếu dữ liệu - Rating")
+#     missing_rating = rating.isna().sum()
+#     missing_rating = pd.DataFrame({"Tên cột": rating.columns, "Số lượng thiếu": missing_rating.values})
+#     st.dataframe(missing_rating, use_container_width=True)
 
-# Xử lý dữ liệu
-anime = preprocess_missing_values(anime)
-after_missing = pd.DataFrame({"Tên cột": anime.columns, "Số lượng thiếu": anime.isna().sum().values})
+# # Xử lý dữ liệu
+# anime = preprocess_missing_values(anime)
+# after_missing = pd.DataFrame({"Tên cột": anime.columns, "Số lượng thiếu": anime.isna().sum().values})
 
-st.subheader("⚙️ Sau khi xử lý Missing values")
-st.dataframe(after_missing, use_container_width=True)
+# st.subheader("⚙️ Sau khi xử lý Missing values")
+# st.dataframe(after_missing, use_container_width=True)
 
 # Invalid Ratings
 # rating = delete_invalid_ratings(rating)

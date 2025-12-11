@@ -7,19 +7,8 @@ import os
 # hàm tải dữ liệu
 @st.cache_data
 def load_data():
-    # Nếu đã có parquet → load siêu nhanh
-    if os.path.exists("anime.parquet") and os.path.exists("rating.parquet"):
-        anime = pd.read_parquet("anime.parquet")
-        rating = pd.read_parquet("rating.parquet")
-        return rating, anime
-    
-    # Nếu chưa có parquet → đọc CSV và tự động convert
-    rating = pd.read_csv("rating.csv")
-    anime = pd.read_csv("anime.csv")
-
-    anime.to_parquet("anime.parquet", index=False)
-    rating.to_parquet("rating.parquet", index=False)
-
+    anime = pd.read_parquet("anime.parquet")
+    rating = pd.read_parquet("rating.parquet")
     return rating, anime
 
 # hàm tiền xử lý dữ liệu anime
