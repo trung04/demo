@@ -1,0 +1,212 @@
+import streamlit as st
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from wordcloud import WordCloud
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+st.set_page_config(page_title="Anime Analytics Dashboard", layout="wide")
+
+
+# ============================
+# 1. LOAD DATA
+# ============================
+@st.cache_data
+def load_data():
+    rating = pd.read_csv("rating.csv")
+    anime = pd.read_csv("anime.csv")
+    return rating, anime
+
+rating, anime = load_data()
+
+# ============================
+# 1. HEADER
+# ============================
+st.title("🎌 Anime Analytics Dashboard")
+st.caption("✨ Phân tích, trực quan hóa và gợi ý anime dựa trên dữ liệu người dùng")
+
+# ============================
+# 2. LÀM SẠCH DỮ LIỆU
+# ============================
+st.header("🛠️ Làm sạch và chuẩn bị dữ liệu")
+
+colA, colB = st.columns(2)
+
+with colA:
+    st.subheader("🔍 Thiếu dữ liệu - Anime")
+    missing_anime = anime.isna().sum()
+    missing_anime = pd.DataFrame({"Tên cột": anime.columns, "Số lượng thiếu": missing_anime.values})
+    st.dataframe(missing_anime, use_container_width=True)
+
+with colB:
+    st.subheader("🔍 Thiếu dữ liệu - Rating")
+    missing_rating = rating.isna().sum()
+    missing_rating = pd.DataFrame({"Tên cột": rating.columns, "Số lượng thiếu": missing_rating.values})
+    st.dataframe(missing_rating, use_container_width=True)
+
+# Xử lý dữ liệu
+anime = anime[~np.isnan(anime["rating"])]
+anime["genre"] = anime["genre"].fillna(anime["genre"].mode()[0])
+anime["type"] = anime["type"].fillna(anime["type"].mode()[0])
+
+after_missing = pd.DataFrame({"Tên cột": anime.columns, "Số lượng thiếu": anime.isna().sum().values})
+
+st.subheader("⚙️ Sau khi xử lý Missing values")
+st.dataframe(after_missing, use_container_width=True)
+
+# Loại bỏ rating -1
+rating_clean = rating[rating["rating"] != -1]
+
+# Duplicate
+st.subheader("🧹 Loại bỏ dữ liệu trùng lặp")
+before_dup = len(rating_clean)
+rating_clean = rating_clean.drop_duplicates()
+after_dup = len(rating_clean)
+
+before_dup_anime = len(anime)
+rating_clean_anime = anime.drop_duplicates()
+after_dup_anime = len(rating_clean_anime)
+
+st.success(f"✔ Đã loại {before_dup - after_dup} dòng trùng trong rating.")
+st.success(f"✔ Đã loại {before_dup_anime - after_dup_anime} dòng trùng trong anime.")
+
+st.subheader("🔍 Vector hóa dữ liệu IF-IDF")
+# Tạo văn bản kết hợp (genre + type)
+anime_cb = rating_clean_anime.copy()
+anime_cb["combined"] = (
+    anime_cb["genre"].fillna("").replace(",", " ") + " " +
+    anime_cb["type"].fillna("")
+)
+# TF-IDF vectorizer
+tfidf = TfidfVectorizer(stop_words="english")
+tfidf_matrix = tfidf.fit_transform(anime_cb["combined"])
+tfidf_df = pd.DataFrame(
+    tfidf_matrix.todense(),
+    columns=tfidf.get_feature_names_out(),
+    index=anime_cb["name"]
+)
+st.dataframe(tfidf_df)
+
+
+# ============================
+# 3. GỘP DỮ LIỆU
+# ============================
+st.header("📌 Dữ liệu sau khi gộp")
+
+merged = rating_clean.merge(rating_clean_anime, on="anime_id", how="inner")
+merged = merged.rename(columns={
+    "rating_x": "user_rating",
+    "rating_y": "anime_avg_rating",
+    "name": "anime_name",
+    "genre": "anime_genre"
+})
+
+st.dataframe(merged.head(), use_container_width=True)
+
+# ============================
+# 4. DASHBOARD
+# ============================
+st.header("📊 Phân tích & Trực quan hóa")
+
+tab1, tab2, tab3, tab4, tab5 = st.tabs([
+    "📈 Phân bố Rating",
+    "🏆 Top Anime",
+    "🎭 Phân tích Genre",
+    "🔥 Heatmap",
+    "🤖 Hệ thống gợi ý"
+])
+
+# ============================
+# TAB 1: PHÂN BỐ RATING
+# ============================
+# with tab1:
+#     st.subheader("📈 Histogram phân bố Rating")
+
+#     fig, ax = plt.subplots(figsize=(8, 5))
+#     sns.histplot(data=rating_clean, x="rating", bins=20, kde=True, color="skyblue", ax=ax)
+#     ax.set_title("Phân bố Rating", fontsize=14, fontweight="bold")
+#     ax.set_xlabel("Rating")
+#     ax.set_ylabel("Tần suất")
+#     st.pyplot(fig)
+
+# ============================
+# TAB 2: TOP ANIME
+# ============================
+# with tab2:
+#     st.subheader("🏆 Top Anime theo Rating trung bình")
+
+#     top_n = st.slider("Chọn số lượng top:", 5, 30, 15)
+
+#     top_anime = (
+#         rating_clean_anime.sort_values("rating", ascending=False)
+#         .head(top_n)
+#         .reset_index(drop=True)
+#     )
+
+#     st.dataframe(top_anime, use_container_width=True)
+
+#     fig, ax = plt.subplots(figsize=(12, 6))
+#     bars = ax.bar(top_anime["name"], top_anime["rating"], color=sns.color_palette("tab20", top_n))
+
+#     for bar, rating in zip(bars, top_anime["rating"]):
+#         ax.text(
+#             bar.get_x() + bar.get_width() / 2,
+#             bar.get_height() - 0.4,
+#             f"{rating:.2f}",
+#             ha="center",
+#             color="black",
+#             bbox=dict(facecolor="orange", edgecolor="black", boxstyle="round,pad=0.3")
+#         )
+
+#     plt.xticks(rotation=90)
+#     ax.set_ylabel("Rating")
+#     ax.set_title("Top Anime theo Rating", fontsize=14, fontweight="bold")
+#     st.pyplot(fig)
+
+# # ============================
+# # TAB 3: PHÂN TÍCH GENRE
+# # ============================
+# with tab3:
+#     st.subheader("🎭 Tần suất thể loại Anime")
+
+#     genre_exploded = anime["genre"].dropna().str.split(", ").explode()
+#     genre_count = genre_exploded.value_counts()
+
+#     genre_df = pd.DataFrame([genre_count.values], columns=genre_count.index)
+#     st.dataframe(genre_df, use_container_width=True)
+
+#     st.subheader("☁️ WordCloud Genre")
+
+#     wc_text = " ".join(genre_exploded)
+#     wordcloud = WordCloud(width=900, height=400, background_color="white").generate(wc_text)
+
+#     fig, ax = plt.subplots(figsize=(12, 6))
+#     ax.imshow(wordcloud, interpolation="bilinear")
+#     ax.axis("off")
+#     st.pyplot(fig)
+
+# # ============================
+# # TAB 4: HEATMAP
+# # ============================
+# with tab4:
+#     st.subheader("🔥 Heatmap Tương Quan")
+
+#     corr = merged[["user_rating", "anime_avg_rating", "members"]].corr()
+
+#     fig, ax = plt.subplots(figsize=(6, 4))
+#     sns.heatmap(corr, annot=True, cmap="coolwarm", ax=ax)
+#     st.pyplot(fig)
+
+# # ============================
+# # TAB 5: RECOMMENDATION SYSTEM
+# # ============================
+# with tab5:
+#     st.subheader("🤖 Hệ thống gợi ý Anime")
+
+#     st.info("Chọn một anime để xem các gợi ý tương tự")
+
+#     anime_list = rating_clean_anime["name"].values
+#     selected = st.selectbox("🎬 Chọn một anime:", anime_list)
+
+#     st.write(f"👉 Gợi ý cho **{selected}** sẽ hiển thị tại đây.")
