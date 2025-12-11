@@ -14,13 +14,16 @@ def load_data():
 # hàm tiền xử lý dữ liệu anime
 @st.cache_data
 def preprocess_missing_values(anime):
-    anime = anime[~np.isnan(anime["rating"])]
-    anime["genre"] = anime["genre"].fillna(anime["genre"].mode()[0])
-    anime["type"] = anime["type"].fillna(anime["type"].mode()[0])
-    anime["combined"] = (
-        anime["genre"].str.replace(",", " ", regex=False) + " " +
-        anime["type"]
+    # Loại bỏ rating bị NaN và tạo bản copy an toàn
+    anime = anime[~np.isnan(anime["rating"])].copy()
+    # Sửa Missing bằng .loc để tránh SettingWithCopyWarning
+    anime.loc[:, "genre"] = anime["genre"].fillna(anime["genre"].mode()[0])
+    anime.loc[:, "type"] = anime["type"].fillna(anime["type"].mode()[0])
+    # Tạo trường combined
+    anime.loc[:, "combined"] = (
+        anime["genre"].str.replace(",", " ", regex=False) + " " + anime["type"]
     )
+
     return anime
 
 # # hàm loại bỏ đánh giá không hợp lệ
