@@ -99,15 +99,15 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs([
 # ============================
 # TAB 1: PHÂN BỐ RATING
 # ============================
-# with tab1:
-#     st.subheader("📈 Histogram phân bố Rating")
+with tab1:
+    st.subheader("📈 Histogram phân bố Rating")
 
-#     fig, ax = plt.subplots(figsize=(8, 5))
-#     sns.histplot(data=rating_clean, x="rating", bins=20, kde=True, color="skyblue", ax=ax)
-#     ax.set_title("Phân bố Rating", fontsize=14, fontweight="bold")
-#     ax.set_xlabel("Rating")
-#     ax.set_ylabel("Tần suất")
-#     st.pyplot(fig)
+    fig, ax = plt.subplots(figsize=(8, 5))
+    sns.histplot(data=rating_clean, x="rating", bins=20, kde=True, color="skyblue", ax=ax)
+    ax.set_title("Phân bố Rating", fontsize=14, fontweight="bold")
+    ax.set_xlabel("Rating")
+    ax.set_ylabel("Tần suất")
+    st.pyplot(fig)
 
 # ============================
 # TAB 2: TOP ANIME
