@@ -49,52 +49,52 @@ st.subheader("⚙️ Sau khi xử lý Missing values")
 st.dataframe(after_missing, use_container_width=True)
 
 # Invalid Ratings
-rating = delete_invalid_ratings(rating)
+# rating = delete_invalid_ratings(rating)
 
-# Duplicate
-st.subheader("🧹 Loại bỏ dữ liệu trùng lặp")
-before_dup = len(rating)
-before_dup_anime = len(anime)
-anime_clean,rating_clean = preprocess_duplicate(anime,rating)
-after_dup = len(rating_clean)
-after_dup_anime = len(anime_clean)
+# # Duplicate
+# st.subheader("🧹 Loại bỏ dữ liệu trùng lặp")
+# before_dup = len(rating)
+# before_dup_anime = len(anime)
+# anime_clean,rating_clean = preprocess_duplicate(anime,rating)
+# after_dup = len(rating_clean)
+# after_dup_anime = len(anime_clean)
 
-st.success(f"✔ Đã loại {before_dup - after_dup} dòng trùng trong rating.")
-st.success(f"✔ Đã loại {before_dup_anime - after_dup_anime} dòng trùng trong anime.")
+# st.success(f"✔ Đã loại {before_dup - after_dup} dòng trùng trong rating.")
+# st.success(f"✔ Đã loại {before_dup_anime - after_dup_anime} dòng trùng trong anime.")
 
-st.subheader("🔍 Vector hóa dữ liệu IF-IDF")
-# Tạo văn bản kết hợp (genre + type)
-
-
-# TF-IDF vectorizer
-tfidf, tfidf_matrix, cosine_sim = build_tfidf(anime_clean)
-sample_tfidf = pd.DataFrame(
-    tfidf_matrix[:10, :20].toarray(),
-    columns=tfidf.get_feature_names_out()[:20],
-    index=anime_clean["name"][:10]
-)
-st.dataframe(sample_tfidf)
+# st.subheader("🔍 Vector hóa dữ liệu IF-IDF")
+# # Tạo văn bản kết hợp (genre + type)
 
 
-# ============================
-# 3. GỘP DỮ LIỆU
-# ============================
-st.header("📌 Dữ liệu sau khi gộp")
-merged = merge_data(rating_clean, anime_clean)
-st.dataframe(merged.head(), use_container_width=True)
+# # TF-IDF vectorizer
+# tfidf, tfidf_matrix, cosine_sim = build_tfidf(anime_clean)
+# sample_tfidf = pd.DataFrame(
+#     tfidf_matrix[:10, :20].toarray(),
+#     columns=tfidf.get_feature_names_out()[:20],
+#     index=anime_clean["name"][:10]
+# )
+# st.dataframe(sample_tfidf)
 
-# ============================
-# 4. DASHBOARD
-# ============================
-st.header("📊 Phân tích & Trực quan hóa")
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs([
-    "📈 Phân bố Rating",
-    "🏆 Top Anime",
-    "🎭 Phân tích Genre",
-    "🔥 Heatmap",
-    "🤖 Hệ thống gợi ý"
-])
+# # ============================
+# # 3. GỘP DỮ LIỆU
+# # ============================
+# st.header("📌 Dữ liệu sau khi gộp")
+# merged = merge_data(rating_clean, anime_clean)
+# st.dataframe(merged.head(), use_container_width=True)
+
+# # ============================
+# # 4. DASHBOARD
+# # ============================
+# st.header("📊 Phân tích & Trực quan hóa")
+
+# tab1, tab2, tab3, tab4, tab5 = st.tabs([
+#     "📈 Phân bố Rating",
+#     "🏆 Top Anime",
+#     "🎭 Phân tích Genre",
+#     "🔥 Heatmap",
+#     "🤖 Hệ thống gợi ý"
+# ])
 
 # ============================
 # TAB 1: PHÂN BỐ RATING
