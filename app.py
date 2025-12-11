@@ -116,7 +116,7 @@ with tab1:
         .properties(width="container", height=350, title="Phân bố Rating (Altair)")
     )
 
-    st.altair_chart(chart, use_container_width=True)
+    st.altair_chart(chart, width="stretch")
 
 # ============================
 # TAB 2: TOP ANIME
@@ -169,7 +169,7 @@ with tab2:
         .configure_axis(grid=False)
     )
 
-    st.altair_chart(final_chart, use_container_width=True)
+    st.altair_chart(final_chart, width="stretch")
 
 # # ============================
 # # TAB 3: PHÂN TÍCH GENRE
@@ -203,7 +203,7 @@ with tab3:
         .properties(width="container", height=400)
     )
 
-    st.altair_chart(chart_bar, use_container_width=True)
+    st.altair_chart(chart_bar, width="stretch")
     st.subheader("☁️ WordCloud thể loại Anime")
     # Tạo WordCloud
     genre_text = " ".join(genre_exploded.tolist())
