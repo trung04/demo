@@ -33,20 +33,20 @@ with colA:
     st.subheader("🔍 Thiếu dữ liệu - Anime")
     missing_anime = anime.isna().sum()
     missing_anime = pd.DataFrame({"Tên cột": anime.columns, "Số lượng thiếu": missing_anime.values})
-    st.dataframe(missing_anime, use_container_width=True)
+    st.dataframe(missing_anime, width="stretch")
 
 with colB:
     st.subheader("🔍 Thiếu dữ liệu - Rating")
     missing_rating = rating.isna().sum()
     missing_rating = pd.DataFrame({"Tên cột": rating.columns, "Số lượng thiếu": missing_rating.values})
-    st.dataframe(missing_rating, use_container_width=True)
+    st.dataframe(missing_rating, width="stretch")
 
 # # Xử lý dữ liệu
 anime = preprocess_missing_values(anime)
 after_missing = pd.DataFrame({"Tên cột": anime.columns, "Số lượng thiếu": anime.isna().sum().values})
 
 st.subheader("⚙️ Sau khi xử lý Missing values")
-st.dataframe(after_missing, use_container_width=True)
+st.dataframe(after_missing, width="stretch")
 
 # Invalid Ratings
 rating = delete_invalid_ratings(rating)
@@ -81,7 +81,7 @@ st.dataframe(sample_tfidf)
 # # ============================
 st.header("📌 Dữ liệu sau khi gộp")
 merged = merge_data(rating_clean, anime_clean)
-st.dataframe(merged.head(), use_container_width=True)
+st.dataframe(merged.head(), width="stretch")
 
 # # ============================
 # # 4. DASHBOARD
@@ -123,7 +123,7 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs([
 #         .reset_index(drop=True)
 #     )
 
-#     st.dataframe(top_anime, use_container_width=True)
+#     st.dataframe(top_anime, width="stretch")
 
 #     fig, ax = plt.subplots(figsize=(12, 6))
 #     bars = ax.bar(top_anime["name"], top_anime["rating"], color=sns.color_palette("tab20", top_n))
@@ -153,7 +153,7 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs([
 #     genre_count = genre_exploded.value_counts()
 
 #     genre_df = pd.DataFrame([genre_count.values], columns=genre_count.index)
-#     st.dataframe(genre_df, use_container_width=True)
+#     st.dataframe(genre_df, width="stretch")
 
 #     st.subheader("☁️ WordCloud Genre")
 
