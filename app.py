@@ -112,80 +112,80 @@ with tab1:
 # ============================
 # TAB 2: TOP ANIME
 # ============================
-# with tab2:
-#     st.subheader("🏆 Top Anime theo Rating trung bình")
+with tab2:
+    st.subheader("🏆 Top Anime theo Rating trung bình")
 
-#     top_n = st.slider("Chọn số lượng top:", 5, 30, 15)
+    top_n = st.slider("Chọn số lượng top:", 5, 30, 15)
 
-#     top_anime = (
-#         rating_clean_anime.sort_values("rating", ascending=False)
-#         .head(top_n)
-#         .reset_index(drop=True)
-#     )
+    top_anime = (
+        rating_clean_anime.sort_values("rating", ascending=False)
+        .head(top_n)
+        .reset_index(drop=True)
+    )
 
-#     st.dataframe(top_anime, width="stretch")
+    st.dataframe(top_anime, width="stretch")
 
-#     fig, ax = plt.subplots(figsize=(12, 6))
-#     bars = ax.bar(top_anime["name"], top_anime["rating"], color=sns.color_palette("tab20", top_n))
+    fig, ax = plt.subplots(figsize=(12, 6))
+    bars = ax.bar(top_anime["name"], top_anime["rating"], color=sns.color_palette("tab20", top_n))
 
-#     for bar, rating in zip(bars, top_anime["rating"]):
-#         ax.text(
-#             bar.get_x() + bar.get_width() / 2,
-#             bar.get_height() - 0.4,
-#             f"{rating:.2f}",
-#             ha="center",
-#             color="black",
-#             bbox=dict(facecolor="orange", edgecolor="black", boxstyle="round,pad=0.3")
-#         )
+    for bar, rating in zip(bars, top_anime["rating"]):
+        ax.text(
+            bar.get_x() + bar.get_width() / 2,
+            bar.get_height() - 0.4,
+            f"{rating:.2f}",
+            ha="center",
+            color="black",
+            bbox=dict(facecolor="orange", edgecolor="black", boxstyle="round,pad=0.3")
+        )
 
-#     plt.xticks(rotation=90)
-#     ax.set_ylabel("Rating")
-#     ax.set_title("Top Anime theo Rating", fontsize=14, fontweight="bold")
-#     st.pyplot(fig)
+    plt.xticks(rotation=90)
+    ax.set_ylabel("Rating")
+    ax.set_title("Top Anime theo Rating", fontsize=14, fontweight="bold")
+    st.pyplot(fig)
 
 # # ============================
 # # TAB 3: PHÂN TÍCH GENRE
 # # ============================
-# with tab3:
-#     st.subheader("🎭 Tần suất thể loại Anime")
+with tab3:
+    st.subheader("🎭 Tần suất thể loại Anime")
 
-#     genre_exploded = anime["genre"].dropna().str.split(", ").explode()
-#     genre_count = genre_exploded.value_counts()
+    genre_exploded = anime["genre"].dropna().str.split(", ").explode()
+    genre_count = genre_exploded.value_counts()
 
-#     genre_df = pd.DataFrame([genre_count.values], columns=genre_count.index)
-#     st.dataframe(genre_df, width="stretch")
+    genre_df = pd.DataFrame([genre_count.values], columns=genre_count.index)
+    st.dataframe(genre_df, width="stretch")
 
-#     st.subheader("☁️ WordCloud Genre")
+    st.subheader("☁️ WordCloud Genre")
 
-#     wc_text = " ".join(genre_exploded)
-#     wordcloud = WordCloud(width=900, height=400, background_color="white").generate(wc_text)
+    wc_text = " ".join(genre_exploded)
+    wordcloud = WordCloud(width=900, height=400, background_color="white").generate(wc_text)
 
-#     fig, ax = plt.subplots(figsize=(12, 6))
-#     ax.imshow(wordcloud, interpolation="bilinear")
-#     ax.axis("off")
-#     st.pyplot(fig)
+    fig, ax = plt.subplots(figsize=(12, 6))
+    ax.imshow(wordcloud, interpolation="bilinear")
+    ax.axis("off")
+    st.pyplot(fig)
 
 # # ============================
 # # TAB 4: HEATMAP
 # # ============================
-# with tab4:
-#     st.subheader("🔥 Heatmap Tương Quan")
+with tab4:
+    st.subheader("🔥 Heatmap Tương Quan")
 
-#     corr = merged[["user_rating", "anime_avg_rating", "members"]].corr()
+    corr = merged[["user_rating", "anime_avg_rating", "members"]].corr()
 
-#     fig, ax = plt.subplots(figsize=(6, 4))
-#     sns.heatmap(corr, annot=True, cmap="coolwarm", ax=ax)
-#     st.pyplot(fig)
+    fig, ax = plt.subplots(figsize=(6, 4))
+    sns.heatmap(corr, annot=True, cmap="coolwarm", ax=ax)
+    st.pyplot(fig)
 
 # # ============================
 # # TAB 5: RECOMMENDATION SYSTEM
 # # ============================
-# with tab5:
-#     st.subheader("🤖 Hệ thống gợi ý Anime")
+with tab5:
+    st.subheader("🤖 Hệ thống gợi ý Anime")
 
-#     st.info("Chọn một anime để xem các gợi ý tương tự")
+    st.info("Chọn một anime để xem các gợi ý tương tự")
 
-#     anime_list = rating_clean_anime["name"].values
-#     selected = st.selectbox("🎬 Chọn một anime:", anime_list)
+    anime_list = rating_clean_anime["name"].values
+    selected = st.selectbox("🎬 Chọn một anime:", anime_list)
 
-#     st.write(f"👉 Gợi ý cho **{selected}** sẽ hiển thị tại đây.")
+    st.write(f"👉 Gợi ý cho **{selected}** sẽ hiển thị tại đây.")
