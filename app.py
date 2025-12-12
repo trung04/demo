@@ -8,9 +8,9 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from data_manager import load_data, preprocess_missing_values, delete_invalid_ratings, preprocess_duplicate, merge_data, build_tfidf
 import altair as alt
+import os
 
 st.set_page_config(page_title="Anime Analytics Dashboard", layout="wide")
-
 
 # ============================
 # 1. LOAD DATA
@@ -59,6 +59,7 @@ before_dup_anime = len(anime)
 anime_clean,rating_clean = preprocess_duplicate(anime,rating)
 after_dup = len(rating_clean)
 after_dup_anime = len(anime_clean)
+
 
 st.success(f"✔ Đã loại {before_dup - after_dup} dòng trùng trong rating.")
 st.success(f"✔ Đã loại {before_dup_anime - after_dup_anime} dòng trùng trong anime.")
